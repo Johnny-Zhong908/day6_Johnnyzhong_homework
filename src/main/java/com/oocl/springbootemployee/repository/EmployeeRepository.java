@@ -48,4 +48,16 @@ public class EmployeeRepository {
         employeeToUpdate.setSalary(salary);
         return employeeToUpdate;
     }
+    public void deleteEmployeeById(int id) {
+        employees.removeIf(employee -> employee.getId() == id);
+    }
+    public List<Employee> getEmployeesByPage(int page, int size) {
+        int skipCount = (page - 1) * size;
+        return employees.stream()
+                .skip(skipCount)
+                .limit(size)
+                .collect(Collectors.toList());
+    }
+
+
 }

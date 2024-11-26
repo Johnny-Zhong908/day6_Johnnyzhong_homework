@@ -47,4 +47,15 @@ public class EmployeeController {
     public Employee updateEmployee(@PathVariable int id, @RequestBody UpdateEmployeeDto updateEmployeeDto){
         return employeeRepository.updateEmployee(id, updateEmployeeDto.getAge(), updateEmployeeDto.getSalary());
     }
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteEmployee(@PathVariable int id) {
+        employeeRepository.deleteEmployeeById(id);
+    }
+    @GetMapping(params = {"page", "size"})
+    public List<Employee> getEmployeesByPage(@RequestParam int page, @RequestParam int size) {
+        return employeeRepository.getEmployeesByPage(page, size);
+    }
+
+
 }

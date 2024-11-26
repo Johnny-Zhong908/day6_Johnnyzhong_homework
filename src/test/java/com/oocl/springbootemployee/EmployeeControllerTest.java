@@ -150,6 +150,60 @@ public class EmployeeControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.gender").value(Gender.Male.name()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.salary").value(8000.0));
 
+        // Then
+    }
+    @Test
+    void should_delete_employee_when_create_employee_given_json() throws Exception {
+        // Given
+        String employeeJson = "{\n" +
+                "        \"name\": \"Tony\",\n" +
+                "        \"age\": 20,\n" +
+                "        \"gender\": \"Male\",\n" +
+                "        \"salary\": 2000.0\n" +
+                "    }";
+
+        // When
+        client.perform(MockMvcRequestBuilders.post("/employees")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(employeeJson))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Tony"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.age").value(20))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.gender").value(Gender.Male.name()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.salary").value(2000.0));
+
+        // Then
+    }
+    @Test
+    void should_delete_employee_when_delete_given_id() throws Exception {
+        // Given
+        int idToDelete = 1;
+
+        // When
+        client.perform(MockMvcRequestBuilders.delete("/employees/{id}", idToDelete))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        // Then
+        String response = client.perform(MockMvcRequestBuilders.get("/employees"))
+                .andReturn().getResponse().getContentAsString();
+
+        List<Employee> remainingEmployees = jsonList.parse(response).getObject();
+        assertThat(remainingEmployees.stream().noneMatch(employee -> employee.getId() == idToDelete)).isTrue();
+    }
+    @Test
+    void should_return_paginated_employees_when_get_employees_by_page_and_size() throws Exception {
+        // Given
+        List<Employee> employees = employeeRepository.getEmployeesByPage(1, 2);
+
+        String jsonContent = jsonList.write(employees).getJson();
+
+        // When
+        client.perform(MockMvcRequestBuilders.get("/employees")
+                        .param("page", "1")
+                        .param("size", "2"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().json(jsonContent));
 
         // Then
     }
